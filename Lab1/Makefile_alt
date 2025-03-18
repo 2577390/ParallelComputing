@@ -1,0 +1,15 @@
+#This is a comment
+P1=pi_par_2577390
+#INC="./inc"
+#FLAGS=-I$(INC)
+OMPFLAG=-fopenmp
+CC=gcc
+CFLAGS = -g -Wall
+
+all: hello_omp $(P1) 
+
+$(P1): $(P1).c
+	$(CC) $(CFLAGS) $(OMPFLAG) $(P1).c -o $(P1)
+
+clean:
+	rm -vf $(P1)
