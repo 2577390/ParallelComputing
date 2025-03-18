@@ -18,12 +18,13 @@ double serialPi(){
     }
 
     pi = step * sum;
-    printf("Method 0 = %f \n",pi);
+    printf("Seqential: pi with %d steps is %f  in () seconds using () %d threads\n Speedup: ()\n ",pi);
+
     return pi;
 }
 
 
-double method1Pi(){
+double falseSharingPi(){
 
 
     long num_steps = 1000000;
@@ -58,12 +59,12 @@ double method1Pi(){
     }
     
     
-    printf("Method 1 = %f \n",pi);
+    printf("Parallel with false sharing: pi with %d steps is %f  in () seconds using () %d threads\n Speedup: ()\n ",pi);
     return pi;
 }
 
 
-double method2Pi(){method1Pi();
+double raceConditionPi(){
 
 
     long num_steps = 1000000;
@@ -71,9 +72,10 @@ double method2Pi(){method1Pi();
     
     double pi = 0.0;
     double sum = 0.0;
+    double x;
 
     int id, tthreads; 
-    double x;
+    
 
     #pragma omp parallel
     {  
@@ -85,9 +87,42 @@ double method2Pi(){method1Pi();
         }
     }
 
-    pi = sum * step;    
+    pi += step * sum;    
     
     printf("Method 2 = %f \n",pi);
+    return pi;
+}
+
+
+double noRaceConditionPi(){
+
+    long num_steps = 1000000;
+    double step = 1.0 / (double) num_steps;
+    
+    double pi = 0.0;
+    
+
+    int id, tthreads; 
+    double x;
+
+    #pragma omp parallel
+    {  
+        tthreads = omp_get_num_threads();
+        id = omp_get_thread_num();
+        double sum = 0.0;
+        for(int i = id; i < num_steps; i += tthreads){
+            x = (i + 0.5 ) * step;
+            sum += 4.0 / (1.0 + (x*x));
+        }
+
+        #pragma omp atomic
+        pi += step * sum;    
+
+    }
+
+     
+    
+    printf("Method 3 = %f \n",pi);
     return pi;
 }
 
@@ -96,8 +131,9 @@ int main(int argc, char const *argv[])
     /* code */
 
     serialPi();
-    method1Pi();
-    method2Pi();
+    falseSharingPi();
+    raceConditionPi();
+    noRaceConditionPi();
     return 0;
 }
 
