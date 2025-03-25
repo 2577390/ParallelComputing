@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <omp.h>
-#define NUM_THREADS 12
+
 
 void usage(char prog_name[]);
 double serialPi(double step);
@@ -9,6 +9,7 @@ double falseSharingPi(double step);
 double raceConditionPi(double step);
 double noRaceConditionPi(double step);
 static long num_steps = 1000000;
+int NUM_THREADS;
 
 int main(int argc, char const *argv[])
 {
@@ -21,6 +22,9 @@ int main(int argc, char const *argv[])
 		exit (-1);
 	}
 	
+    NUM_THREADS = omp_get_max_threads();
+    omp_set_num_threads(NUM_THREADS);
+
     run_time=0;
     iter=atoi(argv[1]);
 	step = 1.0/(double)num_steps;
